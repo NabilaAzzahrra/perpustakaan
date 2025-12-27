@@ -12,7 +12,11 @@ class KebijakanController extends Controller
      */
     public function index()
     {
-        //
+        $data = Kebijakan::first();
+        //dd($data);
+        return view('kebijakan.index')->with([
+            'data' => $data
+        ]);
     }
 
     /**
@@ -50,9 +54,19 @@ class KebijakanController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Kebijakan $kebijakan)
+    public function update(Request $request, string $id)
     {
-        //
+        $data = Kebijakan::findOrFail($id);
+
+        $data->update($request->only([
+            'max_waktu_peminjaman',
+            'max_jml_buku',
+            'denda'
+        ]));
+
+        return redirect()
+            ->route('kebijakan.index')
+            ->with('message_update', 'Data Sudah diupdate');
     }
 
     /**
