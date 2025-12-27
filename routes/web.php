@@ -27,6 +27,14 @@ Route::middleware('auth')->group(function () {
         ->name('book.export');
     Route::patch('/status/{id}', [BookController::class, 'status'])
         ->name('book.status');
+    Route::get(
+        'transaction/search/anggota',
+        [TransaksiController::class, 'searchAnggota']
+    )->name('transaction.search.anggota');
+    Route::get(
+        'transaction/search/buku',
+        [TransaksiController::class, 'searchBuku']
+    )->name('transaction.search.buku');
 });
 
 require __DIR__ . '/auth.php';

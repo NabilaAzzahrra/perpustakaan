@@ -68,7 +68,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white border dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-3xl">
+            <div class="bg-white border dark:bg-gray-800 overflow-x-auto shadow-sm sm:rounded-3xl">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="table-responsive">
                         <table class="datatable display table table-striped w-full">
@@ -136,6 +136,11 @@
                                             </button>
                                         </td>
                                     </tr>
+                                    <form id="status-form-{{ $i->id }}"
+                                        action="{{ route('book.status', $i->id) }}" method="POST" class="hidden">
+                                        @csrf
+                                        @method('PATCH')
+                                    </form>
                                 @empty
                                     <div class="bg-gray-500 text-white p-3 rounded shadow-sm mb-3">
                                         Data Belum Tersedia!
@@ -148,11 +153,6 @@
             </div>
         </div>
     </div>
-    <form id="status-form-{{ $i->id }}" action="{{ route('book.status', $i->id) }}" method="POST"
-        class="hidden">
-        @csrf
-        @method('PATCH')
-    </form>
     <script>
         const bookDelete = async (id, judul) => {
             Swal.fire({
