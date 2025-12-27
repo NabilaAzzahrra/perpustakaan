@@ -27,7 +27,8 @@
                                 Filter
                             </button>
 
-                            <a href="{{ route('transaction.index') }}" class="border px-4 pb-2 pt-2 rounded-xl text-gray-500">
+                            <a href="{{ route('transaction.index') }}"
+                                class="border px-4 pb-2 pt-2 rounded-xl text-gray-500">
                                 Reset
                             </a>
                         </div>
@@ -66,7 +67,7 @@
                                     @php
                                         $statusClass = match ($i->status) {
                                             'Selesai' => 'bg-emerald-100 text-emerald-600',
-                                            'Aktif' => 'bg-amber-100 text-amber-600'
+                                            'Aktif' => 'bg-amber-100 text-amber-600',
                                         };
                                     @endphp
                                     <tr>
@@ -81,11 +82,13 @@
                                                 class="{{ $statusClass }} px-4 text-sm py-1 rounded-full font-bold">{{ $i->status }}</span>
                                         </td>
                                         <td class="text-center">
-                                            <a href="{{ route('transaction.show', $i->id) }}" class="mr-4" title="detail">
+                                            <a href="{{ route('transaction.show', $i->id) }}" class="mr-4"
+                                                title="detail">
                                                 <i class="fi fi-ss-info text-xl mt-1 text-gray-500"></i>
                                             </a>
 
-                                            <a href="{{ route('transaction.edit', $i->id) }}" class="mr-4" title="print faktur peminjaman">
+                                            <a href="{{ route('transaction.edit', $i->id) }}" class="mr-4"
+                                                title="print faktur peminjaman">
                                                 <i class="fi fi-sr-print text-xl mt-1 text-gray-500"></i>
                                             </a>
 
@@ -108,4 +111,47 @@
             </div>
         </div>
     </div>
+    <script>
+        const transactionDelete = async (id, transaksi_kode) => {
+            Swal.fire({
+                title: `Apakah Anda yakin?`,
+                text: `Data akan dihapus secara permanen!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    await axios.post(`/transaction/${id}`, {
+                            '_method': 'DELETE',
+                            '_token': $('meta[name="csrf-token"]').attr('content')
+                        })
+                        .then(function(response) {
+                            Swal.fire({
+                                title: 'Terhapus!',
+                                text: `Data ${transaksi_kode} berhasil dihapus.`,
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                allowOutsideClick: false
+                            }).then(() => {
+                                // Refresh halaman setelah menekan tombol OK
+                                location.reload();
+                            });
+                        })
+                        .catch(function(error) {
+                            // Alert jika terjadi kesalahan
+                            Swal.fire({
+                                title: 'Gagal!',
+                                text: 'Terjadi kesalahan saat menghapus data.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+                            console.log(error);
+                        });
+                }
+            });
+        };
+    </script>
 </x-app-layout>

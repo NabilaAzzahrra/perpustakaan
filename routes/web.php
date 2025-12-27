@@ -23,7 +23,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('transaction', TransaksiController::class);
     Route::resource('kebijakan', KebijakanController::class);
     Route::resource('report', ReportController::class);
-    Route::get('/export', [BookController::class, 'export'])
+    Route::get('/export-book', [BookController::class, 'export'])
         ->name('book.export');
     Route::patch('/status/{id}', [BookController::class, 'status'])
         ->name('book.status');

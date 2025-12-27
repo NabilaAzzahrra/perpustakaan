@@ -124,32 +124,107 @@ class TransaksiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Transaksi $transaksi)
+    public function show(string $id)
     {
-        //
+        $query = Transaksi::with(['anggota', 'petugas'])
+            ->withCount('detailTransaksi')
+            ->where('id', $id);
+        $data = $query->first();
+        $transaksiCode = $data->transaksi_kode;
+        $detail = DetailTransaksi::where('transaksi_code', $transaksiCode)->get();
+        $kebijakan = Kebijakan::first();
+        return view('transaksi.detail')->with([
+            'data' => $data,
+            'detail' => $detail,
+            'kebijakan' => $kebijakan,
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Transaksi $transaksi)
+    public function edit(string $id)
     {
-        //
+        $query = Transaksi::with(['anggota', 'petugas'])
+            ->withCount('detailTransaksi')
+            ->where('id', $id);
+        $data = $query->first();
+        $transaksiCode = $data->transaksi_kode;
+        $detail = DetailTransaksi::where('transaksi_code', $transaksiCode)->get();
+        $kebijakan = Kebijakan::first();
+        return view('transaksi.print')->with([
+            'data' => $data,
+            'detail' => $detail,
+            'kebijakan' => $kebijakan,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Transaksi $transaksi)
+    public function update(Request $request, string $id)
     {
-        //
+
+        // update detail transaksi + status buku
+        foreach ($request->detail_id as $i => $detailId) {
+
+            $tglKembali = $request->tgl_kembali[$i];
+
+            // update detail transaksi
+            DetailTransaksi::where('id', $detailId)->update([
+                'tgl_kembali' => $tglKembali,
+                'total_denda' => $request->total_denda[$i],
+                'status_buku' => 'Ada',
+            ]);
+
+            // 👉 JIKA buku sudah dikembalikan → status buku = Ada
+            if (!empty($tglKembali)) {
+                $detail = DetailTransaksi::find($detailId);
+
+                Book::where('id', $detail->id_buku)->update([
+                    'status' => 'Ada',
+                ]);
+            }
+        }
+
+        $transaksi = Transaksi::findOrFail($id);
+        $kode = $transaksi->transaksi_kode;
+
+        // 👉 CEK: masih ada buku yang BELUM dikembalikan?
+        $masihDipinjam = DetailTransaksi::where('transaksi_code', $kode)
+            ->whereNull('tgl_kembali')
+            ->exists();
+
+        // update status transaksi hanya jika semua sudah kembali
+        if (!$masihDipinjam) {
+            Transaksi::where('id', $id)->update([
+                'status' => 'Selesai',
+            ]);
+        }
+
+        return redirect()
+            ->route('transaction.index')
+            ->with('success', 'Pengembalian berhasil disimpan');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Transaksi $transaksi)
+    public function destroy(string $id)
     {
-        //
+        DB::transaction(function () use ($id) {
+
+            $transaksi = Transaksi::findOrFail($id);
+            $details = DetailTransaksi::where('transaksi_code', $transaksi->transaksi_kode)->get();
+            foreach ($details as $detail) {
+                Book::where('id', $detail->id_buku)->update([
+                    'status' => 'Ada',
+                ]);
+            }
+            DetailTransaksi::where('transaksi_code', $transaksi->transaksi_kode)->delete();
+            $transaksi->delete();
+        });
+
+        return back()->with('message_delete', 'Data sudah dihapus');
     }
 }

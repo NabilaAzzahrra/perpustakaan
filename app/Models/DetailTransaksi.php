@@ -18,4 +18,9 @@ class DetailTransaksi extends Model
     ];
 
     protected $table='detail_transaksis';
+
+    public function book()
+    {
+        return $this->belongsTo(Book::class, 'id_buku', 'id');
+    }
 }
