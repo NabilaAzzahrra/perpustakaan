@@ -7,20 +7,35 @@ use App\Models\Kebijakan;
 use App\Models\Transaksi;
 use App\Models\DetailTransaksi;
 use App\Models\User;
+use App\Exports\TransactionExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TransaksiController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = Transaksi::all();
+        $query = Transaksi::with(['anggota', 'petugas'])
+            ->withCount('detailTransaksi');
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        $data = $query->get();
         return view('transaksi.index')->with([
-            'data' => $data
+            'data' => $data,
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(
+            new TransactionExport($request),
+            'data-transaction.xlsx'
+        );
     }
 
     /**
@@ -71,7 +86,7 @@ class TransaksiController extends Controller
                 'tgl_pinjam' => $request->tgl_pinjam,
                 'tgl_batas' => $request->tgl_batas,
                 'id_kebijakan' => $request->id_kebijakan,
-                'status' => 'Dipinjam',
+                'status' => 'Aktif',
             ]);
 
             foreach ($request->buku as $item) {

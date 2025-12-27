@@ -23,4 +23,17 @@ class Transaksi extends Model
     ];
 
     protected $table = 'transaksis';
+
+    public function anggota()
+    {
+        return $this->belongsTo(User::class, 'id_anggota', 'id');
+    }
+    public function petugas()
+    {
+        return $this->belongsTo(User::class, 'id_petugas', 'id');
+    }
+    public function detailTransaksi()
+    {
+        return $this->hasMany(DetailTransaksi::class, 'transaksi_code', 'transaksi_kode');
+    }
 }

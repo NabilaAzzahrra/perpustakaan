@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('transaksi_code');
             $table->integer('id_buku');
-            $table->date('tgl_kembali');
+            $table->date('tgl_kembali')->nullable();
             $table->integer('total_denda');
             $table->string('status_buku');
             $table->timestamps();

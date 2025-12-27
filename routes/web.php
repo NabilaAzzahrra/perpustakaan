@@ -35,6 +35,8 @@ Route::middleware('auth')->group(function () {
         'transaction/search/buku',
         [TransaksiController::class, 'searchBuku']
     )->name('transaction.search.buku');
+    Route::get('/export', [TransaksiController::class, 'export'])
+        ->name('transaction.export');
 });
 
 require __DIR__ . '/auth.php';

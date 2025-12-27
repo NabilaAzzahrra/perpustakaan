@@ -47,7 +47,18 @@ class User extends Authenticatable
         ];
     }
 
-    public function books(){
+    public function books()
+    {
         return $this->hasMany(Book::class, 'user_id', 'id');
+    }
+
+    public function transaksiAnggota()
+    {
+        return $this->hasMany(Transaksi::class, 'id_anggota', 'id');
+    }
+
+    public function transaksiPetugas()
+    {
+        return $this->hasMany(Transaksi::class, 'id_petugas', 'id');
     }
 }
